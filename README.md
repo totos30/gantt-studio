@@ -27,18 +27,15 @@
 ### 🚀 Utilisation
 
 **Option 1 — En ligne (GitHub Pages)**
-```
+
 [gantt-studio](https://totos30.github.io/gantt-studio/gantt-studio.html)
-```
+
 
 **Option 2 — En local**
 1. Télécharger `gantt-studio.html`
 2. Ouvrir dans votre navigateur
 3. C'est tout.
 
-### 📸 Aperçu
-
-> _Captures d'écran à ajouter_
 
 ### 🛠 Format d'import CSV
 
@@ -85,18 +82,15 @@ MIT © 2025 — Voir [LICENSE](LICENSE)
 ### 🚀 Usage
 
 **Option 1 — Online (GitHub Pages)**
-```
+
 [gantt-studio](https://totos30.github.io/gantt-studio/gantt-studio.html)
-```
+
 
 **Option 2 — Local**
 1. Download `gantt-studio.html`
 2. Open it in your browser
 3. That's it.
 
-### 📸 Screenshots
-
-> _Screenshots to be added_
 
 ### 🛠 CSV Import Format
 
