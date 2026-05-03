@@ -28,7 +28,7 @@
 
 **Option 1 — En ligne (GitHub Pages)**
 ```
-https://totos30.github.io/gantt-studio/gantt-studio.html
+[gantt-studio](https://totos30.github.io/gantt-studio/gantt-studio.html)
 ```
 
 **Option 2 — En local**
@@ -86,7 +86,7 @@ MIT © 2025 — Voir [LICENSE](LICENSE)
 
 **Option 1 — Online (GitHub Pages)**
 ```
-https://totos30.github.io/gantt-studio/gantt-studio.html
+[gantt-studio](https://totos30.github.io/gantt-studio/gantt-studio.html)
 ```
 
 **Option 2 — Local**
