@@ -415,7 +415,7 @@ input[type=number].di{width:45px;text-align:right;}
       💡 <strong>Conseil :</strong> Utilisez le bouton <em>Modèle CSV</em> pour télécharger un fichier d'exemple prêt à remplir, puis importez-le directement.
     </div>
 
-    <div class="info-ver">Gantt Studio v1.0 - Made with ❤️ / <a style="text-decoration:none;color:#7eb3e8" href="https://www.linkedin.com/in/etienne-martos-605a0320/" target="_blank"> Etienne</a></div>
+    <div class="info-ver">Gantt Studio v1.1 - Made with ❤️ / <a style="text-decoration:none;color:#7eb3e8" href="https://www.linkedin.com/in/etienne-martos-605a0320/" target="_blank"> Etienne</a></div>
 
     <div class="pnl-ft">
       <button class="btn btn-blue" onclick="closeModal('info-ov')" id="btn-info-close">Fermer</button>
@@ -986,7 +986,23 @@ function buildSVG(opts={}){
   const barTasks  =tasks.filter(t=>!t.milestone);
   const milestones=tasks.filter(t=>t.milestone);
 
-  const PAD=24, TW=totalDays*D, FULL=TW+PAD*2;
+  const PAD=24;
+  // Marge gauche dynamique : une barre trop courte pour son texte affiche son
+  // libellé à gauche ; si la tâche démarre trop tôt dans la timeline, il n'y a
+  // pas assez de place pour ce libellé avec la marge de base — on l'agrandit
+  // pour qu'il reste toujours visible plutôt que de le laisser clippé dans la barre.
+  let extraLeft=0;
+  barTasks.forEach(t=>{
+    const bw=Math.max(diffDays(t.start,t.end)*D,D*2,4);
+    const br=Math.min(rxBar,BAR_H/2);
+    const txtPad=Math.max(11,br+5);
+    const estTxtW=t.name.length*6;
+    if(estTxtW<=bw-txtPad*2) return;
+    const needed=estTxtW+12-dx(t.start)-PAD;
+    if(needed>extraLeft) extraLeft=needed;
+  });
+  const LPAD=PAD+Math.max(0,extraLeft);
+  const TW=totalDays*D, FULL=TW+LPAD+PAD;
   const FS_MS=9.5;
   const titleH =showTitle?52:0;
   const yearH  =years?18:0;
@@ -1013,28 +1029,28 @@ function buildSVG(opts={}){
   // Year ruler
   if(years){
     years.forEach((yr,i)=>{
-      svg.appendChild(sEl('rect',{x:PAD+yr.x,y:Y_YEAR,width:yr.w,height:yearH,rx:rxRuler>yearH/2?yearH/2:rxRuler,fill:i%2===0?'#0f172a':'#1e293b'}));
-      if(yr.w>30) svg.appendChild(sEl('text',{x:PAD+yr.x+yr.w/2,y:Y_YEAR+yearH/2+4,'text-anchor':'middle','font-size':10,'font-weight':700,fill:'#94a3b8','font-family':FONT,'letter-spacing':1},yr.label));
+      svg.appendChild(sEl('rect',{x:LPAD+yr.x,y:Y_YEAR,width:yr.w,height:yearH,rx:rxRuler>yearH/2?yearH/2:rxRuler,fill:i%2===0?'#0f172a':'#1e293b'}));
+      if(yr.w>30) svg.appendChild(sEl('text',{x:LPAD+yr.x+yr.w/2,y:Y_YEAR+yearH/2+4,'text-anchor':'middle','font-size':10,'font-weight':700,fill:'#94a3b8','font-family':FONT,'letter-spacing':1},yr.label));
     });
   }
 
   // Month ruler — rx clamped: pill = rulerH/2, square = 0
   const rulerRx = years ? Math.min(rxRuler,4) : Math.min(rxRuler, rulerH/2);
-  svg.appendChild(sEl('rect',{x:PAD,y:Y_RUL,width:TW,height:rulerH,rx:rulerRx,fill:'#1e293b'}));
+  svg.appendChild(sEl('rect',{x:LPAD,y:Y_RUL,width:TW,height:rulerH,rx:rulerRx,fill:'#1e293b'}));
   months.forEach((m,i)=>{
-    if(i>0) svg.appendChild(sEl('line',{x1:PAD+m.x,y1:Y_RUL+5,x2:PAD+m.x,y2:Y_RUL+rulerH-5,stroke:'#334155','stroke-width':1,opacity:0.8}));
-    if(m.w>17) svg.appendChild(sEl('text',{x:PAD+m.x+m.w/2,y:Y_RUL+rulerH/2+3.5,'text-anchor':'middle','font-size':9.5,'font-weight':600,fill:'white','font-family':FONT},m.label));
+    if(i>0) svg.appendChild(sEl('line',{x1:LPAD+m.x,y1:Y_RUL+5,x2:LPAD+m.x,y2:Y_RUL+rulerH-5,stroke:'#334155','stroke-width':1,opacity:0.8}));
+    if(m.w>17) svg.appendChild(sEl('text',{x:LPAD+m.x+m.w/2,y:Y_RUL+rulerH/2+3.5,'text-anchor':'middle','font-size':9.5,'font-weight':600,fill:'white','font-family':FONT},m.label));
   });
 
   // Month grid lines (orange dashed)
   months.forEach((m,i)=>{
     if(i===0)return;
-    svg.appendChild(sEl('line',{x1:PAD+m.x,y1:Y_RUL,x2:PAD+m.x,y2:Y_BARS+barsH+6,stroke:'#fb923c','stroke-width':0.8,'stroke-dasharray':'4 5',opacity:0.35}));
+    svg.appendChild(sEl('line',{x1:LPAD+m.x,y1:Y_RUL,x2:LPAD+m.x,y2:Y_BARS+barsH+6,stroke:'#fb923c','stroke-width':0.8,'stroke-dasharray':'4 5',opacity:0.35}));
   });
 
   // Milestone vertical drop lines
   milestones.forEach(ms=>{
-    const cx=PAD+dx(ms.start);if(cx<PAD||cx>PAD+TW)return;
+    const cx=LPAD+dx(ms.start);if(cx<LPAD||cx>LPAD+TW)return;
     const color=ms.color||(ms.progress===100?'#f59e0b':'#f97316');
     svg.appendChild(sEl('line',{x1:cx,y1:Y_RUL+rulerH,x2:cx,y2:Y_BARS+barsH+6,stroke:color,'stroke-width':1,'stroke-dasharray':'5 4',opacity:0.45}));
   });
@@ -1043,14 +1059,14 @@ function buildSVG(opts={}){
   const defs=sEl('defs');
   milestones.forEach(ms=>{
     const lw=Math.max(56,ms.name.length*FS_MS*0.62+16);
-    const cx=PAD+dx(ms.start), PI=6;
+    const cx=LPAD+dx(ms.start), PI=6;
     const cp=sEl('clipPath',{id:`cpms-${ms.id}`});
     cp.appendChild(sEl('rect',{x:cx-lw/2+PI,y:0,width:Math.max(0,lw-PI*2),height:totalH_nat}));
     defs.appendChild(cp);
   });
   barTasks.forEach(t=>{
     const bw=Math.max(diffDays(t.start,t.end)*D,D*2,4);
-    const bx=PAD+dx(t.start), br=BAR_H/2;
+    const bx=LPAD+dx(t.start), br=BAR_H/2;
     const cp=sEl('clipPath',{id:`cp-${t.id}`});
     cp.appendChild(sEl('rect',{x:bx+br,y:0,width:Math.max(0,bw-br*2-4),height:totalH_nat}));
     defs.appendChild(cp);
@@ -1060,7 +1076,7 @@ function buildSVG(opts={}){
   const msLv=assignLevels(milestones,D,vs,FS_MS);
   const DIAM=8;
   msLv.forEach(ms=>{
-    const cx=PAD+dx(ms.start), cy=Y_RUL+rulerH/2;
+    const cx=LPAD+dx(ms.start), cy=Y_RUL+rulerH/2;
     const color=ms.color||(ms.progress===100?'#f59e0b':'#f97316');
     const lw=ms._lw, lvOffset=(N_LV-1-ms._lv)*LV_H;
     const lbY=Y_MS+lvOffset, lbH=LV_H-4;
@@ -1081,7 +1097,7 @@ function buildSVG(opts={}){
   // Today line
   const todayX=dx(new Date());
   if(todayX>=0&&todayX<=TW){
-    const tx=PAD+todayX;
+    const tx=LPAD+todayX;
     svg.appendChild(sEl('line',{x1:tx,y1:Y_RUL-2,x2:tx,y2:Y_BARS+barsH+8,stroke:'#ef4444','stroke-width':1.5,'stroke-dasharray':'4 3'}));
     svg.appendChild(sEl('polygon',{points:`${tx-5},${Y_RUL-2} ${tx+5},${Y_RUL-2} ${tx},${Y_RUL+7}`,fill:'#ef4444'}));
     svg.appendChild(sEl('rect',{x:tx-14,y:Y_RUL-16,width:28,height:13,rx:3,fill:'#ef4444'}));
@@ -1092,7 +1108,7 @@ function buildSVG(opts={}){
   const FS_BAR=10, FS_DATE=8.5, FS_WKS=9;
   barTasks.forEach((tk,i)=>{
     const rowY=Y_BARS+rowGap+i*(ROW_H+rowGap), barY=rowY, dateY=barY+BAR_H+3;
-    const bx=PAD+dx(tk.start);
+    const bx=LPAD+dx(tk.start);
     const bw=Math.max(diffDays(tk.start,tk.end)*D,D*2,4);
     const pw=bw*tk.progress/100;
     const c=tk.color||PALETTE[i%PALETTE.length], cdk=darken(c);
@@ -1117,8 +1133,6 @@ function buildSVG(opts={}){
 
     // Positionnement et couleur du texte
     const estTxtW = tk.name.length * 6;
-    const spaceLeft = bx - PAD;
-    const textFitsLeft = estTxtW <= spaceLeft - 8;
     const textFitsInBar = estTxtW <= bw - txtPad * 2;
 
     // Règle couleur : blanc uniquement si 100% (fond entièrement coloré garanti)
@@ -1126,11 +1140,11 @@ function buildSVG(opts={}){
     const txtOnColor = tk.progress === 100;
     const txtFill = txtOnColor ? bestTextColor(c) : '#1e293b';
 
-    if(!textFitsInBar && textFitsLeft){
-      // Texte à gauche de la barre
+    if(!textFitsInBar){
+      // Texte à gauche de la barre — LPAD garantit toujours la place nécessaire
       svg.appendChild(sEl('text',{x:bx-8,y:barY+BAR_H/2+FS_BAR*0.38,'text-anchor':'end','font-size':FS_BAR,'font-weight':700,fill:'#1e293b','font-family':FONT},tk.name));
     } else {
-      // Texte dans la barre (ou débordement) — clippé
+      // Texte dans la barre
       svg.appendChild(sEl('text',{x:bx+txtPad,y:barY+BAR_H/2+FS_BAR*0.38,'font-size':FS_BAR,'font-weight':700,fill:txtFill,'font-family':FONT,'clip-path':`url(#cp-${tk.id})`},tk.name));
     }
 
