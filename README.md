@@ -1,6 +1,6 @@
 # 📊 Gantt Studio
 
-**🇫🇷 Français** | [🇬🇧 English below](#-gantt-studio-1)
+**🇫🇷 Français** | [🇬🇧 English below](#-gantt-studio-2)  
 
 ---
 
