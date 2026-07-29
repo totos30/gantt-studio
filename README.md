@@ -55,7 +55,7 @@
 
 ### 📄 Licence
 
-MIT © 2025 — Voir [LICENSE](LICENSE)
+MIT © 2026 — Voir [LICENSE](LICENSE)
 
 ---
 
@@ -115,4 +115,4 @@ Feel free to open an issue or submit a pull request.
 
 ### 📄 License
 
-MIT © 2025 — See [LICENSE](LICENSE)
+MIT © 2026 — See [LICENSE](LICENSE)
